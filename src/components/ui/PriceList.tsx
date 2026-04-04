@@ -78,7 +78,7 @@ export default function PriceList({ tabs, sideImage }: PriceListProps) {
     <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mt-12 items-start">
       {sideImage && (
         <div className="hidden lg:block lg:w-[50%] sticky top-8">
-          <div className="relative h-[750px]">
+          <div className="relative h-[620px]">
             <Image
               src={sideImage}
               alt="Price list"

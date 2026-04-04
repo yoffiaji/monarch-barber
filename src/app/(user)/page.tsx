@@ -1,14 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import GlobeWrapper from "@/components/sections/Globe";
-
-import { barbershopLocations } from "@/lib/data";
+import GlobeWrapper from "@/components/features/globe/Globe";
+import { barbershopLocations, globeMarkers } from "@/lib/data";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Nomad Barber Shops — Book your appointment today",
+  title: "Monarch Barber — Book your appointment today",
   description:
-    "Award-winning barbershops in London, Berlin and Mumbai offering premium grooming services.",
+    "Premium barbershops di Surakarta dan Yogyakarta. Nikmati layanan grooming terbaik dengan standar tinggi.",
 };
 
 export default function HomePage() {
@@ -30,7 +29,7 @@ export default function HomePage() {
             <div className="relative w-full aspect-[4/3] lg:aspect-[5/4] mt-8 lg:mt-0 shadow-sm">
               <Image
                 src="/images/home/hero-banner.jpg"
-                alt="Nomad Barber Interior"
+                alt="Monarch Barber Interior"
                 fill
                 className="object-cover"
                 priority
@@ -53,22 +52,21 @@ export default function HomePage() {
             </p>
           </div>
 
-  {/* GRID CONTAINER: Membagi layar menjadi 2 kolom di ukuran LG */}
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mt-16 md:mt-24">
-      
-      {/* SISI KIRI: Globe 3D */}
-      <div className="relative w-full aspect-square flex items-center justify-center">
-        <div className="absolute inset-0 overflow-hidden bg-transparent">
-          <GlobeWrapper />
-        </div>
-      </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mt-16 md:mt-24">
+
+            {/* Globe 3D — ✅ now driven by globeMarkers data */}
+            <div className="relative w-full aspect-square flex items-center justify-center">
+              <div className="absolute inset-0 overflow-hidden bg-transparent">
+                <GlobeWrapper locations={globeMarkers} />
+              </div>
+            </div>
 
             {/* Locations list dengan Timeline Vertikal */}
-            <div className="relative border-l-[3px] border-black pl-8 md:pl-12 space-y-24 py-4 ml-4 lg:ml-0">
+            <div className="relative border-l-[3px] border-black pl-8 md:pl-12 space-y-24 pt-0 pb-4 ml-4 lg:ml-0">
               {barbershopLocations.map((loc) => (
                 <div key={loc.city} className="relative flex flex-col gap-4">
-                  <div className="absolute -left-[42px] md:-left-[58px] top-2 w-5 h-5 bg-black rounded-full border-4 border-[#EBEBEB]" />
-                  <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">
+                  <div className="absolute -left-[42px] md:-left-[58px] top-0 w-5 h-5 bg-black rounded-full border-4 border-[#EBEBEB]" />
+                  <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest leading-5">
                     {loc.order}
                   </span>
                   <h2 className="text-3xl md:text-5xl font-light tracking-[0.1em] uppercase text-black leading-none">

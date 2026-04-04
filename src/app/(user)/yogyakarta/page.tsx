@@ -1,4 +1,4 @@
-import LocationPage from "@/components/sections/LocationPage";
+import LocationPage from "@/components/features/location/LocationPage";
 import yogyakartaData from "@/lib/yogyakartaData";
 import type { Metadata } from "next";
 

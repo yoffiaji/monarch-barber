@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 
-interface MarkerLocation {
+export interface MarkerLocation {
   lat: number;
   lng: number;
   city: string;
@@ -23,35 +23,56 @@ function isWebGLAvailable(): boolean {
 }
 
 // ── Fallback jika WebGL tidak tersedia ───────────────────────────────────────
-function GlobeFallback() {
+function GlobeFallback({ locations }: { locations: MarkerLocation[] }) {
+  const primary = locations[0];
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-4 text-center px-6">
       <div className="w-32 h-32 rounded-full border-2 border-gray-300 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-16 h-16 text-gray-400">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1}
+          stroke="currentColor"
+          className="w-16 h-16 text-gray-400"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
+          />
         </svg>
       </div>
-      <div>
-        <p className="text-xs tracking-widest text-gray-500 uppercase font-medium">Surakarta, Indonesia</p>
-        <p className="text-[10px] text-gray-400 mt-1">7°34′S 110°49′E</p>
-      </div>
+      {primary && (
+        <div>
+          <p className="text-xs tracking-widest text-gray-500 uppercase font-medium">
+            {primary.city}
+          </p>
+          <p className="text-[10px] text-gray-400 mt-1">
+            {primary.lat.toFixed(4)}°, {primary.lng.toFixed(4)}°
+          </p>
+        </div>
+      )}
     </div>
   );
 }
 
 // ── Komponen globe (client only) ─────────────────────────────────────────────
-function GlobeComponent() {
+interface GlobeComponentProps {
+  locations: MarkerLocation[];
+}
+
+function GlobeComponent({ locations }: GlobeComponentProps) {
   const globeEl = useRef<any>(null);
   const [countries, setCountries] = useState<{ features: any[] }>({ features: [] });
   const [GlobeGL, setGlobeGL] = useState<any>(null);
   const [webGLSupported, setWebGLSupported] = useState<boolean | null>(null);
 
-  const locations: MarkerLocation[] = [
-    { lat: -7.5705, lng: 110.8285, city: "Surakarta (Solo)" },
-  ];
+  // Center view on first location, or default to Indonesia
+  const centerLat = locations[0]?.lat ?? -2.5;
+  const centerLng = locations[0]?.lng ?? 118;
 
   useEffect(() => {
-    // Cek WebGL dulu sebelum load library
     const supported = isWebGLAvailable();
     setWebGLSupported(supported);
     if (!supported) return;
@@ -120,21 +141,19 @@ function GlobeComponent() {
       globeEl.current.controls().autoRotate = true;
       globeEl.current.controls().autoRotateSpeed = 0.5;
       globeEl.current.controls().enableZoom = false;
-      globeEl.current.pointOfView({ lat: -7.6, lng: 110.6, altitude: 3.2 }, 1000);
+      globeEl.current.pointOfView(
+        { lat: centerLat, lng: centerLng, altitude: 3.2 },
+        1000
+      );
       const scene = globeEl.current.scene();
       if (scene) scene.background = null;
     } catch {
       setWebGLSupported(false);
     }
-  }, [GlobeGL, countries]);
+  }, [GlobeGL, countries, centerLat, centerLng]);
 
-  // Masih loading
   if (webGLSupported === null) return null;
-
-  // WebGL tidak tersedia → tampilkan fallback
-  if (!webGLSupported) return <GlobeFallback />;
-
-  // Globe belum siap
+  if (!webGLSupported) return <GlobeFallback locations={locations} />;
   if (!GlobeGL) return null;
 
   return (
@@ -147,12 +166,10 @@ function GlobeComponent() {
         showGlobe={false}
         showAtmosphere={false}
         globeImageUrl={null}
-
         hexPolygonsData={countries.features}
         hexPolygonResolution={3}
         hexPolygonMargin={0.3}
         hexPolygonColor={() => "#111111"}
-
         htmlElementsData={locations}
         htmlLat="lat"
         htmlLng="lng"
@@ -169,12 +186,10 @@ function GlobeComponent() {
           `;
           return wrapper;
         }}
-
         animateIn={true}
         waitForGlobeReady={true}
         enablePointerInteraction={true}
         onGlobeReady={() => {
-          // Safety check setelah globe ready
           try {
             if (globeEl.current) {
               globeEl.current.controls().autoRotate = true;
@@ -188,13 +203,23 @@ function GlobeComponent() {
   );
 }
 
-// ── Export: wrapper + globe dalam 1 file, SSR dimatikan ──────────────────────
-const GlobeNoSSR = dynamic(() => Promise.resolve(GlobeComponent), { ssr: false });
+// ── Export dengan SSR dimatikan ──────────────────────────────────────────────
+const GlobeNoSSR = dynamic(
+  () => Promise.resolve(({ locations }: GlobeComponentProps) => (
+    <GlobeComponent locations={locations} />
+  )),
+  { ssr: false }
+);
 
-export default function GlobeWrapper() {
+interface GlobeWrapperProps {
+  // ✅ Now accepts locations as props — driven by data from parent
+  locations: MarkerLocation[];
+}
+
+export default function GlobeWrapper({ locations }: GlobeWrapperProps) {
   return (
     <div className="w-full h-full">
-      <GlobeNoSSR />
+      <GlobeNoSSR locations={locations} />
     </div>
   );
 }

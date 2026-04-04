@@ -56,6 +56,9 @@ export interface LocationPageData {
   // Booking
   bookingLocation: string;
 
+  // Cancellation
+  cancellationImage: string;
+
   // Gallery
   galleryImages: string[];
 }
